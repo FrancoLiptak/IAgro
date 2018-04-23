@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 folder_gui.mkdirs();
             }
 
-            File outputFile = new File(folder_gui,"temp.jpg");
+            File outputFile = new File(folder_gui,"jaja.jpg");
             return outputFile;
         }
 
