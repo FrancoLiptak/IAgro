@@ -26,6 +26,12 @@ public class ShowCamera extends SurfaceView implements SurfaceHolder.Callback {
         parameters.set("orientation", "portrait");
         this.camera.setDisplayOrientation(90);
         parameters.setRotation(90);
+
+        if (parameters.getSupportedFocusModes().contains(
+                Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        }
+
         this.camera.setParameters(parameters);
 
         try{
