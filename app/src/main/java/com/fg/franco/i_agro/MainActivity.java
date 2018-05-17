@@ -12,30 +12,28 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission_group.CAMERA;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
 
     Camera camera;
     FrameLayout frameLayout;
@@ -52,15 +50,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // if(this.checkPermissions()){
+        if(this.checkPermissions()){
 
             frameLayout = (FrameLayout)findViewById(R.id.frameLayout);
-            camera = Camera.open();
+            camera = this.getCameraInstance();
             showCamera = new ShowCamera(this, this.camera);
             frameLayout.addView(this.showCamera);
             image = (ImageView)findViewById(R.id.imageView);
-        // }
+            resultDialog = new ResultDialog();
+            resultDialog.setAnalyzer(analyzer);
 
+        }
+
+    }
+
+    /** A safe way to get an instance of the Camera object. */
+    public static Camera getCameraInstance(){
+        Camera c = null;
+        try {
+            c = Camera.open(); // attempt to get a Camera instance
+        }
+        catch (Exception e){
+            // Camera is not available (in use or does not exist)
+        }
+        return c; // returns null if camera is unavailable
     }
 
     @TargetApi(Build.VERSION_CODES.N)
@@ -69,15 +82,15 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        if((checkSelfPermission(CAMERA) == PackageManager.PERMISSION_GRANTED) && (checkSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) && (checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
+        if((checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) && (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) && (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
             return true;
         }
 
-        if((shouldShowRequestPermissionRationale(CAMERA)) || shouldShowRequestPermissionRationale(WRITE_EXTERNAL_STORAGE) || shouldShowRequestPermissionRationale(READ_EXTERNAL_STORAGE)){
-            showDialogRecomendation();
+        if((shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) || shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) || shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)){
+            showDialogRecommendation();
 
         }else{
-            requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE, CAMERA, READ_EXTERNAL_STORAGE}, 100);
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
         }
 
         return false;
@@ -90,13 +103,13 @@ public class MainActivity extends AppCompatActivity {
 
         if(requestCode==100){
             if(!(grantResults.length==3 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED && grantResults[2] == PackageManager.PERMISSION_GRANTED)){
-                requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE, CAMERA, READ_EXTERNAL_STORAGE}, 100);
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
             }
         }
     }
 
     @TargetApi(Build.VERSION_CODES.N)
-    private void showDialogRecomendation(){
+    private void showDialogRecommendation(){
         AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
         dialog.setTitle("Permisos desactivados");
         dialog.setMessage("Debe aceptar los permisos para el correcto funcionamiento de la APP");
@@ -120,11 +133,8 @@ public class MainActivity extends AppCompatActivity {
                 fos.write(data);
                 fos.close();
 
-                resultDialog = new ResultDialog();
-                resultDialog.setAnalyzer(analyzer);
                 resultDialog.show(getFragmentManager(), "result");
 
-                camera.startPreview();
             }catch(IOException e){
                 e.printStackTrace();
             }
@@ -179,10 +189,42 @@ public class MainActivity extends AppCompatActivity {
         if(resultCode==RESULT_OK){
             Uri path = data.getData();
             this.image.setImageURI(path);
+            image.setVisibility(View.VISIBLE);
 
-            resultDialog = new ResultDialog();
-            resultDialog.setAnalyzer(analyzer);
             resultDialog.show(getFragmentManager(), "result");
         }
     }
+
+    @Override
+    public void onDismiss(final DialogInterface dialog) {
+        image.setVisibility(View.GONE);
+        camera.startPreview();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        this.releaseCamera();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (camera == null) {
+            camera = getCameraInstance();
+            showCamera = new ShowCamera(this, this.camera);
+            frameLayout.addView(this.showCamera);
+        }
+        camera.startPreview();
+    }
+
+    private void releaseCamera(){
+        if (camera != null){
+            camera.release();        // release the camera for other applications
+            camera = null;
+            frameLayout.removeView(this.showCamera);
+            showCamera = null;
+        }
+    }
+
 }

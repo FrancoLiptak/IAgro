@@ -6,39 +6,47 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/buttonCapture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="13dp"
-        android:onClick="captureImage"
-        android:text="Capturar" />
-
-    <Button
-        android:id="@+id/buttonGallery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignTop="@+id/buttonCapture"
-        android:onClick="getImageFromGallery"
-        android:text="Galeria" />
-
     <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
-        android:layout_height="238dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="6dp"></FrameLayout>
+        android:layout_marginTop="0dp"></FrameLayout>
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="190dp"
+        android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/frameLayout"
-        app:srcCompat="@android:drawable/ic_delete" />
+        android:visibility="gone" />
+
+    <ImageButton
+        android:id="@+id/buttonGallery"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:layout_marginStart="50dp"
+        android:background="@drawable/btn_capture_options"
+        android:cropToPadding="true"
+        android:onClick="getImageFromGallery"
+        android:padding="10dp"
+        android:src="@drawable/ic_collections_white_24dp" />
+
+    <Button
+        android:id="@+id/buttonCapture"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/btn_capture"
+        android:onClick="captureImage" />
 
 </RelativeLayout>
