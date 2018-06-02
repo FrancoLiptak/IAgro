@@ -15,14 +15,6 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="0dp"></FrameLayout>
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/frameLayout"
-        android:visibility="gone" />
-
     <ImageButton
         android:id="@+id/buttonGallery"
         android:layout_width="48dp"
@@ -48,5 +40,13 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/btn_capture"
         android:onClick="captureImage" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/frameLayout"
+        android:visibility="gone" />
 
 </RelativeLayout>
