@@ -159,18 +159,11 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CAMERA: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
+                if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this,
-                            Manifest.permission.CAMERA);
+                    boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA);
                     if (! showRationale) {
                         // user also CHECKED "never ask again"
                         // you can either enable some fall back,
@@ -196,20 +189,12 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
             }
             case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
-
+                if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this,
-                            Manifest.permission.READ_EXTERNAL_STORAGE);
+                    boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE);
                     if (! showRationale) {
                         // user also CHECKED "never ask again"
                         // you can either enable some fall back,
@@ -235,20 +220,13 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
             }
             case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
+                if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
                     if (! showRationale) {
                         // user also CHECKED "never ask again"
                         // you can either enable some fall back,
