@@ -45,8 +45,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     ResultDialog resultDialog;
     ImageView image;
     static final int MY_PERMISSIONS_REQUEST_CAMERA = 0;
-    static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
-    static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
+    static final int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 1;
     static final int REQUEST_PERMISSION_SETTING = 3;
     Button buttonGallery;
 
@@ -56,19 +55,16 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        if(this.checkPermissions()){
-
-        this.checkPermissions();
-
         frameLayout = (FrameLayout)findViewById(R.id.frameLayout);
-        camera = this.getCameraInstance();
-        showCamera = new ShowCamera(this, this.camera);
-        frameLayout.addView(this.showCamera);
+        if (this.checkCameraPermissions()){
+            camera = this.getCameraInstance();
+            showCamera = new ShowCamera(this, this.camera);
+            frameLayout.addView(this.showCamera);
+        }
+
         image = (ImageView)findViewById(R.id.imageView);
         resultDialog = new ResultDialog();
         resultDialog.setAnalyzer(analyzer);
-
-//        }
 
     }
 
@@ -85,31 +81,31 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     }
 
 
-    private void checkPermissions() {
-        if (!(ContextCompat.checkSelfPermission(this,
-                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)){
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.CAMERA},
-                        MY_PERMISSIONS_REQUEST_CAMERA);
-
-        }
-        if (!(ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)){
+    private boolean checkCameraPermissions() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
 
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                    new String[]{Manifest.permission.CAMERA},
+                    MY_PERMISSIONS_REQUEST_CAMERA);
 
-        }
-        if (!(ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)){
+            return false;
+
+        }else return true;
+    }
+    private boolean checkStoragePermissions() {
+        if ((ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            || (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)){
 
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE);
 
-        }
+            return false;
+
+        }else return true;
     }
     /*
     @TargetApi(Build.VERSION_CODES.N)
@@ -183,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
                         startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
 
                     } else {
-                        this.checkPermissions();
                         // user did NOT check "never ask again"
                         // this is a good place to explain the user
                         // why you need the permission and ask if he wants
@@ -192,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
                 }
                 return;
             }
-            case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
+            case MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
                 if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     // permission denied, boo! Disable the
@@ -214,38 +209,6 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
                         startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
 
                     } else {
-                        this.checkPermissions();
-                        // user did NOT check "never ask again"
-                        // this is a good place to explain the user
-                        // why you need the permission and ask if he wants
-                        // to accept it (the rationale)
-                    }
-                }
-                return;
-            }
-            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                    if (! showRationale) {
-                        // user also CHECKED "never ask again"
-                        // you can either enable some fall back,
-                        // disable features of your app
-                        // or open another dialog explaining
-                        // again the permission and directing to
-                        // the app setting
-
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri = Uri.fromParts("package", getPackageName(), null);
-                        intent.setData(uri);
-                        startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
-
-                    } else {
-                        this.checkPermissions();
                         // user did NOT check "never ask again"
                         // this is a good place to explain the user
                         // why you need the permission and ask if he wants
@@ -312,8 +275,9 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     }
 
     public void getImageFromGallery(View view) {
-        uploadImage();
-
+        if(this.checkStoragePermissions()){
+            uploadImage();
+        }
     }
 
     private void uploadImage() {
@@ -349,13 +313,14 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     @Override
     protected void onResume() {
         super.onResume();
-        this.checkPermissions();
-        if (camera == null) {
-            camera = getCameraInstance();
-            showCamera = new ShowCamera(this, this.camera);
-            frameLayout.addView(this.showCamera);
+        if (this.checkCameraPermissions()){
+            if (camera == null) {
+                camera = getCameraInstance();
+                showCamera = new ShowCamera(this, this.camera);
+                frameLayout.addView(this.showCamera);
+            }
+            camera.startPreview();
         }
-        camera.startPreview();
     }
 
     private void releaseCamera(){
