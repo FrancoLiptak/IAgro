@@ -5,6 +5,8 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -27,6 +29,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -46,9 +49,9 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     ImageView image;
     static final int MY_PERMISSIONS_REQUEST_CAMERA = 0;
     static final int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 1;
+    static final int PICK_IMAGE_REQUEST= 2;
     static final int REQUEST_PERMISSION_SETTING = 3;
     Button buttonGallery;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         setContentView(R.layout.activity_main);
 
         frameLayout = (FrameLayout)findViewById(R.id.frameLayout);
-        if (this.checkCameraPermissions()){
+        if (this.checkCameraPermissions() && this.checkStoragePermissions()){
             camera = this.getCameraInstance();
             showCamera = new ShowCamera(this, this.camera);
             frameLayout.addView(this.showCamera);
@@ -107,53 +110,6 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
 
         }else return true;
     }
-    /*
-    @TargetApi(Build.VERSION_CODES.N)
-    private boolean checkPermissions(){
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
-            return true;
-        }
-
-        if((checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) && (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) && (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
-            return true;
-        }
-
-        if((shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) || shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) || shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)){
-            showDialogRecommendation();
-
-        }else{
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
-        }
-
-        return false;
-    }
-
-    @TargetApi(Build.VERSION_CODES.N)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if(requestCode==100){
-            if(!(grantResults.length==3 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED && grantResults[2] == PackageManager.PERMISSION_GRANTED)){
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
-            }
-        }
-    }
-
-
-    @TargetApi(Build.VERSION_CODES.N)
-    private void showDialogRecommendation(){
-        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-        dialog.setTitle("Permisos desactivados");
-        dialog.setMessage("Debe aceptar los permisos para el correcto funcionamiento de la APP");
-        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE, CAMERA, READ_EXTERNAL_STORAGE}, 100);
-            }
-        });
-    }
-*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -275,24 +231,34 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     }
 
     public void getImageFromGallery(View view) {
-        if(this.checkStoragePermissions()){
+        if (this.checkStoragePermissions()){
             uploadImage();
         }
     }
 
     private void uploadImage() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/");
-        startActivityForResult(intent.createChooser(intent, "Seleccione la aplicación"), 10);
+        Intent intent = new Intent();
+        // Show only images, no videos or anything else
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        // Always show the chooser (if there are multiple options available)
+        startActivityForResult(Intent.createChooser(intent, "Seleccione una imagen"), PICK_IMAGE_REQUEST);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode==RESULT_OK){
-            Uri path = data.getData();
-            image.setImageURI(path);
-            image.setVisibility(View.VISIBLE);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                // Log.d(TAG, String.valueOf(bitmap));
+
+                image.setVisibility(View.VISIBLE);
+                image.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             resultDialog.show(getFragmentManager(), "result");
         }
@@ -313,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     @Override
     protected void onResume() {
         super.onResume();
-        if (this.checkCameraPermissions()){
+        if (this.checkCameraPermissions() && this.checkStoragePermissions()){
             if (camera == null) {
                 camera = getCameraInstance();
                 showCamera = new ShowCamera(this, this.camera);
