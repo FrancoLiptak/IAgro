@@ -4,4 +4,6 @@
     <string name="result_dialog_message_good">Planta en buen estado</string>
     <string name="result_dialog_message_bad">Planta en mal estado</string>
     <string name="multiple_permissions">Múltiples Permisos</string>
+    <string name="previewDescription">Preview</string>
+    <string name="buttonDescription">Button</string>
 </resources>
