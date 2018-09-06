@@ -63,7 +63,7 @@ public class CameraHandler {
                 FileOutputStream fos = new FileOutputStream(picture_file);
                 fos.write(data);
                 fos.close();
-                context.showDialogFromPictureCallback();
+                context.showDialogFromPictureCallback(picture_file);
             }catch(IOException e){
                 e.printStackTrace();
             }

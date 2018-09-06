@@ -5,11 +5,20 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+
+import java.io.File;
 
 public class ResultDialog extends DialogFragment {
 
-    Analyzer analyzer;
+    private Analyzer analyzer;
+    private File image;
+
+    public void setImage(File image) {
+        this.image = image;
+    }
 
     public void setAnalyzer(Analyzer analyzer) {
         this.analyzer = analyzer;
@@ -19,10 +28,7 @@ public class ResultDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(
-                analyzer.analize()?
-                R.string.result_dialog_message_good : R.string.result_dialog_message_bad)
-                .setTitle(R.string.result_dialog_title);
+        builder.setMessage(analyzer.analize(image));
         // Create the AlertDialog object and return it
         return builder.create();
     }

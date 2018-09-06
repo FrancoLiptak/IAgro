@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     Button buttonGallery;
     ShowCamera showCamera;
     ResultDialog resultDialog = new ResultDialog();
-    RandomAnalyzer analyzer = new RandomAnalyzer();
+    RemoteAnalyzer analyzer = new RemoteAnalyzer();
     PermissionHandler permissionHandler = new PermissionHandler(this);
     StorageHandler storageHandler = new StorageHandler(this);
     CameraHandler cameraHandler = new CameraHandler(this, storageHandler);
@@ -113,7 +113,9 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            resultDialog.setImage(new File(uri.toString()));
             resultDialog.show(getFragmentManager(), "result");
+
         }
     }
 
@@ -146,7 +148,8 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         }
     }
 
-    public void showDialogFromPictureCallback(){
+    public void showDialogFromPictureCallback(File file){
+        resultDialog.setImage(file);
         resultDialog.show(getFragmentManager(), "result");
     }
 

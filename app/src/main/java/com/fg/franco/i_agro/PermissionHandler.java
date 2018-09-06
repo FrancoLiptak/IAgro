@@ -10,7 +10,7 @@ public class PermissionHandler {
     private MainActivity context;
     static final int MY_PERMISSIONS_REQUEST_CAMERA = 0;
     static final int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 1;
-    static final int PICK_IMAGE_REQUEST= 2;
+    static final int PICK_IMAGE_REQUEST = 2;
     static final int REQUEST_PERMISSION_SETTING = 3;
 
     public PermissionHandler(MainActivity context) {
