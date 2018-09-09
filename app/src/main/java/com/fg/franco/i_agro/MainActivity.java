@@ -45,8 +45,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     ImageView image;
     Button buttonGallery;
     ShowCamera showCamera;
-    ResultDialog resultDialog = new ResultDialog();
-    RemoteAnalyzer analyzer = new RemoteAnalyzer();
+    HttpClient client;
     PermissionHandler permissionHandler = new PermissionHandler(this);
     StorageHandler storageHandler = new StorageHandler(this);
     CameraHandler cameraHandler = new CameraHandler(this, storageHandler);
@@ -60,13 +59,13 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.frameLayout = (FrameLayout)findViewById(R.id.frameLayout);
+        this.frameLayout = findViewById(R.id.frameLayout);
         if (this.permissionHandler.checkCameraPermissions() && this.permissionHandler.checkStoragePermissions()){
             this.showCamera = new ShowCamera(this, this.cameraHandler.getCameraInstance());
             this.frameLayout.addView(this.showCamera);
         }
-        this.image = (ImageView)findViewById(R.id.imageView);
-        this.resultDialog.setAnalyzer(analyzer);
+        this.image = findViewById(R.id.imageView);
+        client = new HttpClient(this);
     }
 
     @Override
@@ -106,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
+            System.out.println("path: " + uri);
+            System.out.println("path: " + uri.getPath());
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 image.setVisibility(View.VISIBLE);
@@ -113,9 +114,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            resultDialog.setImage(new File(uri.toString()));
-            resultDialog.show(getFragmentManager(), "result");
-
+            client.doRequest(new File(uri.getPath()));
         }
     }
 
@@ -149,8 +148,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     }
 
     public void showDialogFromPictureCallback(File file){
-        resultDialog.setImage(file);
-        resultDialog.show(getFragmentManager(), "result");
+        client.doRequest(file);
     }
 
     public void captureImage(View v){

@@ -10,15 +10,12 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import java.io.File;
+import java.util.Map;
 
 public class ResultDialog extends DialogFragment {
 
     private Analyzer analyzer;
-    private File image;
-
-    public void setImage(File image) {
-        this.image = image;
-    }
+    private Map<String, Float> response;
 
     public void setAnalyzer(Analyzer analyzer) {
         this.analyzer = analyzer;
@@ -28,7 +25,7 @@ public class ResultDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(analyzer.analize(image));
+        builder.setMessage(analyzer.analize(response));
         // Create the AlertDialog object and return it
         return builder.create();
     }
@@ -42,4 +39,7 @@ public class ResultDialog extends DialogFragment {
         }
     }
 
+    public void setResponse(Map<String,Float> response) {
+        this.response = response;
+    }
 }

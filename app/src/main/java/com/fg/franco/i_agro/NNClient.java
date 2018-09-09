@@ -38,14 +38,14 @@ public class NNClient {
         String textFile = Environment.getExternalStorageDirectory() + "/sample.txt";
         Log.v(TAG, "textFile: " + textFile);
 
-// the URL where the file will be posted
+        // the URL where the file will be posted
         String postReceiverUrl = "http://192.168.0.48:5000/";
         Log.v(TAG, "postURL: " + postReceiverUrl);
 
-// new HttpClient
+        // new HttpClient
         HttpClient httpClient = new DefaultHttpClient();
 
-// post header
+        // post header
         HttpPost httpPost = new HttpPost(postReceiverUrl);
 
         FileBody fileBody = new FileBody(image);
@@ -53,7 +53,7 @@ public class NNClient {
         MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         reqEntity.addPart("image", fileBody);
         httpPost.setEntity(reqEntity);
-// execute HTTP post request
+        // execute HTTP post request
         try{
 
             HttpResponse response = httpClient.execute(httpPost);
