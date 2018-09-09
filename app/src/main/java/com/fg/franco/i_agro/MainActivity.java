@@ -63,22 +63,25 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.frameLayout = findViewById(R.id.frameLayout);
-        if (this.permissionHandler.checkCameraPermissions() && this.permissionHandler.checkStoragePermissions()){
-            this.showCamera = new ShowCamera(this, this.cameraHandler.getCameraInstance());
-            this.frameLayout.addView(this.showCamera);
-        }
         this.image = findViewById(R.id.imageView);
         client = new HttpClient(this);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        System.out.println("request code: "+requestCode);
+        System.out.println("results length: "+ grantResults.length);
+        if (grantResults.length > 0){
+            System.out.println("grant results 0: "+ grantResults[0]);
+        }
+        System.out.println("PERMISSION_GRANTED: "+ PackageManager.PERMISSION_GRANTED);
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CAMERA: {
                 // If request is cancelled, the result arrays are empty.
                 if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA);
-                    if (! showRationale) { // user also checked "never ask again"
+                    System.out.println("show rationale: "+ showRationale);
+                    if (!showRationale) { // user also checked "never ask again"
                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS); // let's go to the configuration of the application
                         Uri uri = Uri.fromParts("package", getPackageName(), null);
                         intent.setData(uri);
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
                 // If request is cancelled, the result arrays are empty.
                 if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-                    if (! showRationale) { // user also CHECKED "never ask again"
+                    if (!showRationale) { // user also CHECKED "never ask again"
                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS); // let's go to the configuration of the application
                         Uri uri = Uri.fromParts("package", getPackageName(), null);
                         intent.setData(uri);
