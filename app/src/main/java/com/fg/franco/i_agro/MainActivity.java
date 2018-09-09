@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
@@ -12,9 +13,11 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -100,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
@@ -114,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            client.doRequest(new File(uri.getPath()));
+            client.doRequest(new File(getRealPostaPath(uri)));
         }
     }
 
@@ -164,5 +168,39 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     public void showSelectAppForSelectImage(Intent intent){
         startActivityForResult(intent.createChooser(intent, "Seleccione una imagen"), PICK_IMAGE_REQUEST);
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public String getRealPostaPath(Uri uriImage)
+    {
+
+
+        // Will return "image:x*"
+        String wholeID = DocumentsContract.getDocumentId(uriImage);
+
+        // Split at colon, use second item in the array
+        String id = wholeID.split(":")[1];
+
+        String[] column = { MediaStore.Images.Media.DATA };
+
+        // where id is equal to
+        String sel = MediaStore.Images.Media._ID + "=?";
+
+        Cursor cursor = getContentResolver().
+                query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        column, sel, new String[]{ id }, null);
+
+        String filePath = "";
+
+        int columnIndex = cursor.getColumnIndex(column[0]);
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(columnIndex);
+        }
+
+        cursor.close();
+
+        return filePath;
+    }
+
 
 }

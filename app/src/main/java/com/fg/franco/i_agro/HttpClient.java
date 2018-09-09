@@ -1,5 +1,12 @@
 package com.fg.franco.i_agro;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -65,11 +72,9 @@ public class HttpClient {
                 resultDialog.show(context.getFragmentManager(), "result");
             }
         });
-        smr.addStringParam("param string", " data text");
         smr.addFile("image", file.getPath());
 
         VolleyManager.getInstance(null).addToRequestQueue(smr);
-        System.out.println("post Volley");
 
     }
 }
