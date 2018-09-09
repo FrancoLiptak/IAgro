@@ -29,6 +29,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import java.io.File;
@@ -46,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
 
     FrameLayout frameLayout;
     ImageView image;
-    Button buttonGallery;
+    ImageButton buttonGallery;
+    Button buttonCapture;
     ShowCamera showCamera;
     HttpClient client;
     PermissionHandler permissionHandler = new PermissionHandler(this);
@@ -62,8 +64,10 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.frameLayout = findViewById(R.id.frameLayout);
-        this.image = findViewById(R.id.imageView);
+        frameLayout = findViewById(R.id.frameLayout);
+        buttonGallery = findViewById(R.id.buttonGallery);
+        buttonCapture = findViewById(R.id.buttonCapture);
+        image = findViewById(R.id.imageView);
         client = new HttpClient(this);
     }
 
@@ -121,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            buttonGallery.setVisibility(View.GONE);
+            buttonCapture.setVisibility(View.GONE);
             client.doRequest(new File(getRealPostaPath(uri)));
         }
     }
@@ -128,6 +134,8 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     @Override
     public void onDismiss(final DialogInterface dialog) {
         image.setVisibility(View.GONE);
+        buttonGallery.setVisibility(View.VISIBLE);
+        buttonCapture.setVisibility(View.VISIBLE);
         this.cameraHandler.getCameraInstance().startPreview();
     }
 
@@ -159,6 +167,8 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     }
 
     public void captureImage(View v){
+        buttonGallery.setVisibility(View.GONE);
+        buttonCapture.setVisibility(View.GONE);
         this.cameraHandler.captureImage(v);
     }
 
