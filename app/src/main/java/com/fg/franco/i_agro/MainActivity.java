@@ -5,9 +5,11 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -24,6 +26,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -45,20 +48,20 @@ import static android.Manifest.permission_group.CAMERA;
 
 public class MainActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
 
-    FrameLayout frameLayout;
-    ImageView image;
-    ImageButton buttonGallery;
-    Button buttonCapture;
-    ShowCamera showCamera;
-    HttpClient client;
-    PermissionHandler permissionHandler = new PermissionHandler(this);
-    StorageHandler storageHandler = new StorageHandler(this);
-    CameraHandler cameraHandler = new CameraHandler(this, storageHandler);
+    private FrameLayout frameLayout;
+    private ImageView image;
+    private ImageButton buttonGallery;
+    private Button buttonCapture;
+    private ShowCamera showCamera;
+    private HttpClient client;
+    private PermissionHandler permissionHandler = new PermissionHandler(this);
+    private StorageHandler storageHandler = new StorageHandler(this);
+    private CameraHandler cameraHandler = new CameraHandler(this, storageHandler);
 
-    static final int MY_PERMISSIONS_REQUEST_CAMERA = 0;
-    static final int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 1;
-    static final int PICK_IMAGE_REQUEST= 2;
-    static final int REQUEST_PERMISSION_SETTING = 3;
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 0;
+    private static final int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 1;
+    private static final int PICK_IMAGE_REQUEST= 2;
+    private static final int REQUEST_PERMISSION_SETTING = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,17 +121,54 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
             Uri uri = data.getData();
             System.out.println("path: " + uri);
             System.out.println("path: " + uri.getPath());
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                image.setVisibility(View.VISIBLE);
-                image.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            image.setVisibility(View.VISIBLE);
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            image.setImageBitmap(decodeSampledBitmapFromResource(getRealPostaPath(uri), size.x, size.y));
             buttonGallery.setVisibility(View.GONE);
             buttonCapture.setVisibility(View.GONE);
             client.doRequest(new File(getRealPostaPath(uri)));
         }
+    }
+
+    public static Bitmap decodeSampledBitmapFromResource(String path,
+                                                         int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(path, options);
+    }
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 
     @Override
