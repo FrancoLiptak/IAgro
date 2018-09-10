@@ -4,14 +4,13 @@ import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.util.Log;
-import android.view.View;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class StorageHandler {
-    MainActivity context;
+    private MainActivity context;
 
     public StorageHandler(MainActivity context) {
         this.context = context;

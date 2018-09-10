@@ -1,12 +1,5 @@
 package com.fg.franco.i_agro;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Build;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -36,7 +29,7 @@ public class HttpClient {
     }
 
     public void doRequest(File file) {
-        String urlName = "http://192.168.0.32:5000/";
+        String urlName = "http://192.168.0.90:5000/";
         responseDictionary = new HashMap<>();
 
 
@@ -45,9 +38,7 @@ public class HttpClient {
                     @Override
                     public void onResponse(String response) {
                         Log.d("Response", response);
-                        System.out.println("got response");
                         try{
-                            System.out.println("make dict");
                             JSONObject jsonObject = new JSONObject(response);
                             Iterator<?> keys = jsonObject.keys();
                             while( keys.hasNext() ) {
@@ -55,7 +46,6 @@ public class HttpClient {
                                 responseDictionary.put(key, BigDecimal.valueOf(jsonObject.getDouble(key)).floatValue());
                                 resultDialog.setResponse(responseDictionary);
                             }
-                            System.out.println(responseDictionary.toString());
                         } catch (JSONException e) {
                             responseDictionary.put("error", 0f);
                             resultDialog.setResponse(responseDictionary);
@@ -68,7 +58,6 @@ public class HttpClient {
             public void onErrorResponse(VolleyError error) {
                 responseDictionary.put("error", 0f);
                 resultDialog.setResponse(responseDictionary);
-                System.out.println(error.getMessage());
                 resultDialog.show(context.getFragmentManager(), "result");
             }
         });

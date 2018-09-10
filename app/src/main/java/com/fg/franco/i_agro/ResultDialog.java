@@ -5,11 +5,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 
-import java.io.File;
 import java.util.Map;
 
 public class ResultDialog extends DialogFragment {

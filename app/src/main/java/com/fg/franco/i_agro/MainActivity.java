@@ -1,50 +1,30 @@
 package com.fg.franco.i_agro;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.hardware.Camera;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.Manifest.permission_group.CAMERA;
 
 public class MainActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
 
@@ -76,18 +56,11 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        System.out.println("request code: "+requestCode);
-        System.out.println("results length: "+ grantResults.length);
-        if (grantResults.length > 0){
-            System.out.println("grant results 0: "+ grantResults[0]);
-        }
-        System.out.println("PERMISSION_GRANTED: "+ PackageManager.PERMISSION_GRANTED);
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CAMERA: {
                 // If request is cancelled, the result arrays are empty.
                 if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA);
-                    System.out.println("show rationale: "+ showRationale);
                     if (!showRationale) { // user also checked "never ask again"
                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS); // let's go to the configuration of the application
                         Uri uri = Uri.fromParts("package", getPackageName(), null);
@@ -119,8 +92,6 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
-            System.out.println("path: " + uri);
-            System.out.println("path: " + uri.getPath());
             image.setVisibility(View.VISIBLE);
             Display display = getWindowManager().getDefaultDisplay();
             Point size = new Point();

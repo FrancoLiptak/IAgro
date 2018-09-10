@@ -1,16 +1,12 @@
 package com.fg.franco.i_agro;
 
 import android.hardware.Camera;
-import android.media.MediaScannerConnection;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class CameraHandler {
     private Camera camera;

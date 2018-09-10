@@ -1,17 +1,15 @@
 package com.fg.franco.i_agro;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.io.IOException;
-import java.util.List;
 
 public class ShowCamera extends SurfaceView implements SurfaceHolder.Callback {
-    Camera camera;
-    SurfaceHolder holder;
+    private Camera camera;
+    private SurfaceHolder holder;
 
     public ShowCamera(Context context, Camera camera) {
         super(context);
