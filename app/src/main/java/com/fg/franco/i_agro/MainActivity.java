@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     private FrameLayout frameLayout;
     private ImageView image;
     private ImageButton buttonGallery;
+    private ImageButton configButton;
     private Button buttonCapture;
     private ShowCamera showCamera;
     private HttpClient client;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         frameLayout = findViewById(R.id.frameLayout);
+        configButton = findViewById(R.id.configButton);
         buttonGallery = findViewById(R.id.buttonGallery);
         buttonCapture = findViewById(R.id.buttonCapture);
         image = findViewById(R.id.imageView);
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
             display.getSize(size);
             image.setImageBitmap(decodeSampledBitmapFromResource(getRealPostaPath(uri), size.x, size.y));
             buttonGallery.setVisibility(View.GONE);
+            configButton.setVisibility(View.GONE);
             buttonCapture.setVisibility(View.GONE);
             client.doRequest(new File(getRealPostaPath(uri)));
         }
@@ -147,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         image.setVisibility(View.GONE);
         buttonGallery.setVisibility(View.VISIBLE);
         buttonCapture.setVisibility(View.VISIBLE);
+        configButton.setVisibility(View.VISIBLE);
         this.cameraHandler.getCameraInstance().startPreview();
     }
 
@@ -180,7 +184,8 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     public void captureImage(View v){
         buttonGallery.setVisibility(View.GONE);
         buttonCapture.setVisibility(View.GONE);
-        this.cameraHandler.captureImage(v);
+        configButton.setVisibility(View.GONE);
+        this.cameraHandler.captureImage();
     }
 
     public void getImageFromGallery(View view) {
@@ -226,5 +231,8 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         return filePath;
     }
 
+    public void setConfig(View view){
+        (new ConfigManager(this)).setConfig();
+    }
 
 }

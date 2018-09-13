@@ -11,10 +11,8 @@
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="0dp">
+        android:layout_alignParentTop="true">
 
     </FrameLayout>
 
@@ -59,5 +57,17 @@
         android:contentDescription="@string/previewDescription"
         android:cropToPadding="false"
         android:visibility="gone" />
+
+    <ImageButton
+        android:id="@+id/configButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="6dp"
+        android:layout_marginTop="14dp"
+        android:background="#00000000"
+        android:onClick="setConfig"
+        app:srcCompat="@android:drawable/ic_menu_manage" />
 
 </RelativeLayout>

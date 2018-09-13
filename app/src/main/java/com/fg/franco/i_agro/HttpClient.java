@@ -1,5 +1,6 @@
 package com.fg.franco.i_agro;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -24,12 +25,13 @@ public class HttpClient {
 
     public HttpClient(MainActivity context){
         this.context = context;
-        resultDialog.setAnalyzer(new MaxAnalyzer());
+        resultDialog.setAnalyzer(new SmartAnalizer());
         VolleyManager.getInstance(context);
     }
 
     public void doRequest(File file) {
-        String urlName = "http://192.168.0.90:5000/";
+        SharedPreferences pref = context.getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+        String urlName = pref.getString("url", null);
         responseDictionary = new HashMap<>();
 
 
@@ -47,7 +49,7 @@ public class HttpClient {
                                 resultDialog.setResponse(responseDictionary);
                             }
                         } catch (JSONException e) {
-                            responseDictionary.put("error", 0f);
+                            responseDictionary.put("JSON error", 1f);
                             resultDialog.setResponse(responseDictionary);
                             e.printStackTrace();
                         }
@@ -56,7 +58,7 @@ public class HttpClient {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                responseDictionary.put("error", 0f);
+                responseDictionary.put("URL error", 1f);
                 resultDialog.setResponse(responseDictionary);
                 resultDialog.show(context.getFragmentManager(), "result");
             }

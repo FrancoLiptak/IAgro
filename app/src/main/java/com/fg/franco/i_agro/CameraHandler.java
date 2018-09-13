@@ -30,7 +30,7 @@ public class CameraHandler {
         return this.camera;
     }
 
-    public void captureImage(View v){
+    public void captureImage(){
         if(this.camera != null){
             this.camera.takePicture(null, null, mPictureCallback);
         }
