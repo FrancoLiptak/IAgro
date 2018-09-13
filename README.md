@@ -6,6 +6,8 @@ El grupo estuvo compuesto por Franco Emanuel Liptak y Gastón Gustavo Ríos, con
 
 El objetivo fue que, gracias a la aplicación Android, se pueda hacer uso de una red neuronal (desarrollada por Paolo Stancato) la cual es capaz de detectar enfermedades en plantas.
 
+La APK está en: https://github.com/FrancoLiptak/IAgro/tree/master/app/release
+
 ---
 
 ## Manual de usuario
