@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         buttonGallery.setVisibility(View.GONE);
         buttonCapture.setVisibility(View.GONE);
         configButton.setVisibility(View.GONE);
-        this.cameraHandler.captureImage();
+        this.cameraHandler.takePicture();
     }
 
     public void getImageFromGallery(View view) {
