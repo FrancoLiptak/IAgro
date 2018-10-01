@@ -25,6 +25,7 @@ import android.widget.ImageView;
 
 import java.io.File;
 
+import io.fotoapparat.routine.orientation.StartOrientationRoutineKt;
 import io.fotoapparat.view.CameraView;
 
 public class MainActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
@@ -34,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     private ImageButton buttonGallery;
     private ImageButton configButton;
     private Button buttonCapture;
-    private ShowCamera showCamera;
     private HttpClient client;
     private PermissionHandler permissionHandler = new PermissionHandler(this);
     private StorageHandler storageHandler = new StorageHandler(this);
@@ -186,13 +186,10 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         System.out.println(uri);
         image.setVisibility(View.VISIBLE);
 
-        System.out.println("Hola 1");
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        System.out.println("Hola 2");
         image.setImageBitmap(decodeSampledBitmapFromResource(uri, size.x, size.y));
-        System.out.println("Hola 3");
         buttonGallery.setVisibility(View.GONE);
         configButton.setVisibility(View.GONE);
         buttonCapture.setVisibility(View.GONE);

@@ -2,6 +2,7 @@ package com.fg.franco.i_agro;
 
 import android.content.BroadcastReceiver;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
@@ -79,11 +80,15 @@ public class CameraHandler {
                 new WhenDoneListener<BitmapPhoto>() {
                     @Override
                     public void whenDone(BitmapPhoto bitmapPhoto) {
-                        Bitmap bmp = bitmapPhoto.bitmap;
+                        Bitmap bitmap = bitmapPhoto.bitmap;
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(90);
+                        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                         byte[] byteArray = stream.toByteArray();
-                        bmp.recycle();
+                        bitmap.recycle();
 
                         File file = storageHandler.getOutputMediaFile();
 
