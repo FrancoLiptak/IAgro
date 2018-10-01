@@ -28,6 +28,11 @@ android {
         exclude 'META-INF/ASL2.0'
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
 }
 
 dependencies {
@@ -38,5 +43,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation 'dev.dworks.libs:volleyplus:+'
+    implementation 'io.fotoapparat:fotoapparat:2.4.0'
 
 }

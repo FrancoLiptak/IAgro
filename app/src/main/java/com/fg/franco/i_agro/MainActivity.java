@@ -20,15 +20,16 @@ import android.os.Bundle;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import java.io.File;
 
+import io.fotoapparat.view.CameraView;
+
 public class MainActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
 
-    private FrameLayout frameLayout;
+    private CameraView cameraView;
     private ImageView image;
     private ImageButton buttonGallery;
     private ImageButton configButton;
@@ -48,12 +49,15 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        frameLayout = findViewById(R.id.frameLayout);
+        cameraView = findViewById(R.id.camera_view);
+        cameraHandler.setCameraView(cameraView);
         configButton = findViewById(R.id.configButton);
         buttonGallery = findViewById(R.id.buttonGallery);
         buttonCapture = findViewById(R.id.buttonCapture);
         image = findViewById(R.id.imageView);
         client = new HttpClient(this);
+
+        cameraHandler.createAndConfigureFotoapparat();
     }
 
     @Override
@@ -94,20 +98,12 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
-            image.setVisibility(View.VISIBLE);
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            image.setImageBitmap(decodeSampledBitmapFromResource(getRealPostaPath(uri), size.x, size.y));
-            buttonGallery.setVisibility(View.GONE);
-            configButton.setVisibility(View.GONE);
-            buttonCapture.setVisibility(View.GONE);
-            client.doRequest(new File(getRealPostaPath(uri)));
+            showImage(getRealPath(uri));
+            client.doRequest(new File(getRealPath(uri)));
         }
     }
 
-    public static Bitmap decodeSampledBitmapFromResource(String path,
-                                                         int reqWidth, int reqHeight) {
+    public static Bitmap decodeSampledBitmapFromResource(String path, int reqWidth, int reqHeight) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -122,8 +118,7 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         return BitmapFactory.decodeFile(path, options);
     }
 
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -151,36 +146,28 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         buttonGallery.setVisibility(View.VISIBLE);
         buttonCapture.setVisibility(View.VISIBLE);
         configButton.setVisibility(View.VISIBLE);
-        this.cameraHandler.getCameraInstance().startPreview();
+        this.cameraHandler.startCamera();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        this.cameraHandler.releaseCamera();
-    }
-
-    public void removeShowCamera(){
-        this.frameLayout.removeView(this.showCamera);
-        this.showCamera = null;
+        this.cameraHandler.stopCamera();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (this.permissionHandler.checkCameraPermissions() && this.permissionHandler.checkStoragePermissions()){
-            if(this.cameraHandler.cameraIsNull()){
-                this.showCamera = new ShowCamera(this, this.cameraHandler.getCameraInstance());
-                this.frameLayout.addView(this.showCamera);
-            }
-            this.cameraHandler.getCameraInstance().startPreview();
+            this.cameraHandler.startCamera();
         }
     }
 
-    public void showDialogFromPictureCallback(File file){
+    public void sendFile(File file){
         client.doRequest(file);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void captureImage(View v){
         buttonGallery.setVisibility(View.GONE);
         buttonCapture.setVisibility(View.GONE);
@@ -194,13 +181,24 @@ public class MainActivity extends AppCompatActivity implements DialogInterface.O
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void showImage(String uri){
+        image.setVisibility(View.VISIBLE);
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        image.setImageBitmap(decodeSampledBitmapFromResource(uri, size.x, size.y));
+        buttonGallery.setVisibility(View.GONE);
+        configButton.setVisibility(View.GONE);
+        buttonCapture.setVisibility(View.GONE);
+    }
+
     public void showSelectAppForSelectImage(Intent intent){
         startActivityForResult(intent.createChooser(intent, "Seleccione una imagen"), PICK_IMAGE_REQUEST);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public String getRealPostaPath(Uri uriImage)
-    {
+    public String getRealPath(Uri uriImage) {
 
 
         // Will return "image:x*"

@@ -1,126 +1,106 @@
 package com.fg.franco.i_agro;
 
+import android.content.BroadcastReceiver;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
-import android.os.Handler;
-import android.util.Log;
-import android.view.View;
+import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import io.fotoapparat.Fotoapparat;
+import io.fotoapparat.parameter.ScaleType;
+import io.fotoapparat.result.BitmapPhoto;
+import io.fotoapparat.result.PendingResult;
+import io.fotoapparat.result.PhotoResult;
+import io.fotoapparat.result.WhenDoneListener;
+import io.fotoapparat.selector.FlashSelectorsKt;
+import io.fotoapparat.selector.FocusModeSelectorsKt;
+import io.fotoapparat.selector.LensPositionSelectorsKt;
+import io.fotoapparat.selector.SelectorsKt;
+import io.fotoapparat.view.CameraView;
 
 public class CameraHandler {
-    private Camera camera;
     private MainActivity context;
     private StorageHandler storageHandler;
+    private CameraView cameraView;
+    private Fotoapparat fotoapparat;
 
     public CameraHandler(MainActivity context, StorageHandler storageHandler) {
         this.context = context;
         this.storageHandler = storageHandler;
     }
 
-    public Camera getCameraInstance(){
-        if(this.camera == null){
-            try {
-                this.camera = Camera.open(); // attempt to get a Camera instance
-            }
-            catch (Exception e){
-                Log.d("I-Agro", "Camera is not available");
-            }
-        }
-        return this.camera;
+    public CameraView getCameraView() {
+        return cameraView;
     }
 
-    public void captureImage(){
-        if(this.camera != null){
-            this.camera.takePicture(null, null, mPictureCallback);
-        }
+    public void setCameraView(CameraView cameraView) {
+        this.cameraView = cameraView;
     }
 
-    Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
-        @Override
-        public void onAutoFocus(boolean success, Camera camera) {
-
-            if (success)
-            {
-                captureImage();
-            }
-
-        }
-    };//end
-
-
-    public void releaseCamera(){
-        if (this.camera != null){
-            this.camera.release(); // release the camera for other applications
-            this.context.removeShowCamera();
-        }
-        this.camera = null;
+    public void createAndConfigureFotoapparat(){
+        fotoapparat = Fotoapparat
+                .with(context)
+                .into(cameraView)           // view which will draw the camera preview
+                .previewScaleType(ScaleType.CenterCrop)
+                .lensPosition(LensPositionSelectorsKt.back())       // we want back camera
+                .focusMode(SelectorsKt.firstAvailable(  // (optional) use the first focus mode which is supported by device
+                        FocusModeSelectorsKt.continuousFocusPicture(),
+                        FocusModeSelectorsKt.autoFocus(),        // in case if continuous focus is not available on device, auto focus will be used
+                        FocusModeSelectorsKt.fixed()             // if even auto focus is not available - fixed focus mode will be used
+                ))
+                .flash(SelectorsKt.firstAvailable(      // (optional) similar to how it is done for focus mode, this time for flash
+                        FlashSelectorsKt.autoRedEye(),
+                        FlashSelectorsKt.autoFlash(),
+                        FlashSelectorsKt.torch()
+                ))
+                .build();
     }
 
-    public boolean cameraIsNull(){
-        return this.camera == null;
+    public void stopCamera(){
+        fotoapparat.stop();
     }
 
-    Camera.PictureCallback mPictureCallback = new Camera.PictureCallback(){
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera){
-            File picture_file = storageHandler.getOutputMediaFile();
-            if (picture_file == null){
-                return;
-            }
-            try{
-                FileOutputStream fos = new FileOutputStream(picture_file);
-                fos.write(data);
-                fos.close();
-                context.showDialogFromPictureCallback(picture_file);
-            }catch(IOException e){
-                e.printStackTrace();
-            }
-        }
-    };
+    public void startCamera(){
+        fotoapparat.start();
+    }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void takePicture(){
+        PhotoResult photoResult = fotoapparat.takePicture();
 
-    public void takePicture() {
-        try
-        {
+        photoResult.toBitmap().whenDone(
+                new WhenDoneListener<BitmapPhoto>() {
+                    @Override
+                    public void whenDone(BitmapPhoto bitmapPhoto) {
+                        Bitmap bmp = bitmapPhoto.bitmap;
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                        byte[] byteArray = stream.toByteArray();
+                        bmp.recycle();
 
-            // determine current focus mode
-            Camera.Parameters params = camera.getParameters();
-            if (params.getFocusMode().equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE))
-            {
-                camera.cancelAutoFocus();      // cancels continuous focus
+                        File file = storageHandler.getOutputMediaFile();
 
-                List<String> lModes = params.getSupportedFocusModes();
-                if (lModes != null)
-                {
-                    if (lModes.contains(Camera.Parameters.FOCUS_MODE_AUTO))
-                    {
-                        params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO); // auto-focus mode if supported
-                        camera.setParameters(params);        // set parameters on device
+                        try {
+
+                            FileOutputStream fos = new FileOutputStream(file);
+                            fos.write(byteArray);
+                            fos.close();
+                            context.showImage(Uri.fromFile(file).toString());
+                            context.sendFile(file);
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-
-                // start an auto-focus after a slight (100ms) delay
-                new Handler().postDelayed(new Runnable() {
-
-                    public void run()
-                    {
-                        camera.autoFocus(autoFocusCallback);    // auto-focus now
-                    }
-
-                }, 100);
-
-                return;
-            }
-
-            camera.autoFocus(autoFocusCallback);       // do the focus, callback is mAutoFocusCallback
-
-        }
-        catch (Exception e)
-        {
-            Log.e("myApp", e.getMessage());
-        }
+        );
     }
+
 }
