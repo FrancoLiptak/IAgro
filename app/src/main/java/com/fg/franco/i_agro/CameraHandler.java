@@ -92,7 +92,7 @@ public class CameraHandler {
                             FileOutputStream fos = new FileOutputStream(file);
                             fos.write(byteArray);
                             fos.close();
-                            context.showImage(Uri.fromFile(file).toString());
+                            context.showImage(Uri.fromFile(file).getPath());
                             context.sendFile(file);
 
                         } catch (IOException e) {
